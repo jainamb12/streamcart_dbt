@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: '{{ doc("streamcart_pipeline") }} Customer dimension table containing lifetime value and segments.'
+    meta:
+      owner: 'data-eng@streamcart.com'
+      contains_pii: true
+      refresh_frequency: 'daily'
+    columns:
+      - name: customer_id
+        description: "Unique identifier for the customer."
+      - name: customer_name
+        description: "Full name of the customer."
+      - name: email
+        description: "Customer email address."
+      - name: phone
+        description: "Customer phone number."
+      - name: customer_tier
+        description: "Loyalty tier status."
+      - name: city
+        description: "City of residence."
+      - name: country_code
+        description: "ISO country code."
+      - name: country_name
+        description: "Full country name."
+      - name: region
+        description: "Geographic region."
+      - name: currency_default
+        description: "Default currency for the country."
+      - name: total_orders
+        description: "Lifetime number of successful orders."
+      - name: total_gross_revenue
+        description: "Lifetime gross revenue."
+      - name: total_net_revenue
+        description: "Lifetime net revenue."
+      - name: avg_order_value
+        description: "Average net revenue per order."
+      - name: customer_segment
+        description: "Calculated segment (Platinum, Gold, Silver, Bronze)."
+      - name: days_since_last_order
+        description: "Days elapsed since the most recent order."

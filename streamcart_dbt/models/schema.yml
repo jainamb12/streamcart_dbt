@@ -1,0 +1,98 @@
+version: 2
+
+models:
+  - name: stg_products
+    tests:
+      # From Task 4 & Task 9
+      - dbt_utils.expression_is_true:
+          expression: "list_price >= cost_price"
+    columns:
+      - name: product_id
+        tests:
+          - unique
+          - not_null
+      - name: margin_pct
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 100
+
+  - name: stg_orders
+    columns:
+      - name: event_id
+        tests:
+          - unique
+          - not_null
+      - name: event_type
+        tests:
+          - accepted_values:
+              values: ['order_placed','order_cancelled','add_to_cart','checkout','page_view']
+      - name: payment_status
+        tests:
+          - accepted_values:
+              values: ['success','failed','pending']
+      - name: currency_code
+        tests:
+          - accepted_values:
+              values: ['INR','USD','GBP','AED','EUR']
+          - valid_currency  # Your Custom Macro!
+      - name: quantity
+        tests:
+          - not_null
+      - name: customer_id
+        tests:
+          - not_null
+      - name: product_id
+        tests:
+          - relationships:
+              to: ref('stg_products')
+              field: product_id
+      - name: net_amount
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 1000000
+      - name: email
+        tests:
+          - dbt_expectations.expect_column_values_to_match_regex:
+              regex: '^[a-z0-9._%+-]+@[a-z0-9.-]+[.][a-z]{2,}$'
+              
+  - name: fct_orders
+    tests:
+      # dbt_expectations test 4
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          min_value: 1000       
+  - name: dim_customers
+    columns:
+      - name: avg_order_value
+        tests:
+          # dbt_expectations test 5
+          - dbt_expectations.expect_column_mean_to_be_between:
+              min_value: 0
+              max_value: 100000
+
+models:
+  - name: stg_products
+    description: "Cleaned and deduplicated products data from the raw JSON stream."
+    columns:
+      - name: product_id
+        description: "Unique identifier for the product."
+        # ... keep your tests here ...
+      - name: margin_pct
+        description: "Calculated profit margin percentage."
+      - name: list_price
+        description: "The price shown to the customer."
+      - name: is_available
+        description: "Boolean indicating if the product is in stock."
+
+  - name: stg_orders
+    description: "Cleaned and masked order event data."
+    columns:
+      - name: event_id
+        description: "Unique identifier for the order event."
+      - name: event_type
+        description: "The type of event (e.g., order_placed)."
+      - name: payment_status
+        description: "Current status of the payment."
+      - name: customer_id
+        description: "Foreign key linking to the customer."
